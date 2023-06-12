@@ -9,10 +9,10 @@ from core.config import settings
 
 engine = create_async_engine(settings.data_base, echo=settings.debug)
 Base = declarative_base()
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) #  type: ignore[call-overload]
 
 
-async def get_pg() -> AsyncSession:
+async def get_pg() -> AsyncSession: #  type: ignore[misc]
     async with async_session() as session:
         yield session
 

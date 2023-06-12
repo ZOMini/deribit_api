@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Sequence
 
 from fastapi import APIRouter, Depends, Query
 
@@ -8,15 +9,17 @@ from services.deribit_service import DeribitService, get_deribit_service
 
 router = APIRouter()
 
+
 class Ticker(str, Enum):
     BTC = 'BTC'
     ETH = 'ETH'
+
 
 @router.get('/all_by_currency')
 async def all_by_currency(
     tiker: Ticker,
     deribit_service: DeribitService = Depends(get_deribit_service),
-) -> list[Currency]:
+) -> Sequence[Currency]:
     # Тут явно напрашивается пагинация, но в задании её нет.
     return await deribit_service.all_by_currency(tiker)
 
@@ -34,5 +37,5 @@ async def currency_by_date(
     tiker: Ticker,
     date: datetime.date = Query('2023-06-13', required=True),
     deribit_service: DeribitService = Depends(get_deribit_service),
-) -> list[Currency]:
+) -> Sequence[Currency]:
     return await deribit_service.currency_by_date(tiker, date)

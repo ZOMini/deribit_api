@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import (
     BackgroundScheduler,
     BlockingScheduler
 )
-from pytz import utc
+from pytz import utc  # type: ignore[import]
 
 from core.config import settings
 from core.logger import logger
@@ -13,7 +13,7 @@ logger.name = 'worker'
 # Если запускать только воркер, без ручек, то миграции ниже.
 # migrate()
 worker_sevice = WorkerService()
-scheduler = BlockingScheduler(timezone=utc) #  Или BackgroundScheduler
+scheduler = BlockingScheduler(timezone=utc)  # Или BackgroundScheduler
 scheduler._logger = logger
 scheduler.add_job(worker_sevice.run_works,
                   'interval',

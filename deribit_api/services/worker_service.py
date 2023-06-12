@@ -11,41 +11,38 @@ from models.deribit_models import Currency
 
 logger.name = 'worker'
 
+
 class WorkerService:
 
     async def post_pg(self,
                       cur_name: str,
                       cur_value: float,
-                      pg_session: AsyncSession):
+                      pg_session: AsyncSession) -> Currency:
         obj = Currency(ticker=cur_name, value=cur_value)
         pg_session.add(obj)
         return obj
-
 
     async def parse_response(self, r: aiohttp.ClientResponse, currency_name):
         response_bin = await r.read()
         return orjson.loads(response_bin)['result'][currency_name]
 
-
-    async def request_and_post_pg(
+    async def request_and_post_pg(  #  type: ignore[return]
             self,
             client: aiohttp.ClientSession,
             pg_session: AsyncSession,
             currency_name: str,
-            url: str) -> tuple[str, str | dict, None]:
+            url: str) -> tuple[int, Currency]:  
         try:
             async with client.get(url + currency_name) as r:
                 if r.status == HTTPStatus.OK:
                     currency_value = await self.parse_response(r, currency_name)
                     pg_obj = await self.post_pg(currency_name,
-                                        currency_value,
-                                        pg_session)
-                    return HTTPStatus.OK, pg_obj
+                                                currency_value,
+                                                pg_session)
+                    return HTTPStatus.OK.value, pg_obj
         except Exception as e:
             logger.error('url - %s exception - %s', url, e.args)
             await pg_session.rollback()
-            return e.args, None
-
 
     async def run_tasks(self, currencies: tuple, url: str) -> dict:
         engine = create_async_engine(settings.data_base)

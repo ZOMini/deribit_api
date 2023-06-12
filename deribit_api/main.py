@@ -11,7 +11,7 @@ app = FastAPI(
     openapi_url='/deribit/api/openapi.json',
     default_response_class=ORJSONResponse,
 )
- 
+
 app.include_router(deribit.router, prefix='/deribit/api/v1', tags=['deribit'])
 
 
@@ -22,7 +22,7 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
-    try: 
+    try:
         await async_session.close_all()
     except TypeError:
         pass

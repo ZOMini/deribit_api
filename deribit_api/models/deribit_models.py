@@ -15,6 +15,7 @@ from typing_extensions import Annotated
 class Base(DeclarativeBase):
     pass
 
+
 uuidpk = Annotated[uuid.UUID, mapped_column(
     UUID(as_uuid=True),
     default=uuid.uuid4,
@@ -29,6 +30,7 @@ ticker_str = Annotated[str, mapped_column(
 value_float = Annotated[float, mapped_column(
     nullable=False)]
 
+
 class Currency(MappedAsDataclass, Base):
     __tablename__ = 'currencies'
 
@@ -39,4 +41,3 @@ class Currency(MappedAsDataclass, Base):
 
     def __repr__(self) -> str:
         return str(self.id)
-
