@@ -24,6 +24,6 @@ class Settings(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-settings = Settings() #  type: ignore[call-arg]
+settings = Settings()  # type: ignore[call-arg]
 settings.data_base = f'postgresql+asyncpg://{settings.postgres_user}:{settings.postgres_password}@{settings.postgres_host}/{settings.postgres_db}'
 settings.data_base_sync = f'postgresql://{settings.postgres_user}:{settings.postgres_password}@{settings.postgres_host}/{settings.postgres_db}'

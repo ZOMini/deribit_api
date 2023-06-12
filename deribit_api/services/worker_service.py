@@ -8,56 +8,48 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from core.config import settings
 from core.logger import logger
 from models.deribit_models import Currency
+from services.aiohttp_client import get_aiohttp
 
 logger.name = 'worker'
 
 
 class WorkerService:
+    pg_session: AsyncSession
+    aio_session: aiohttp.ClientSession
 
     async def post_pg(self,
                       cur_name: str,
-                      cur_value: float,
-                      pg_session: AsyncSession) -> Currency:
+                      cur_value: float) -> Currency:
         obj = Currency(ticker=cur_name, value=cur_value)
-        pg_session.add(obj)
+        self.pg_session.add(obj)
         return obj
 
     async def parse_response(self, r: aiohttp.ClientResponse, currency_name):
         response_bin = await r.read()
         return orjson.loads(response_bin)['result'][currency_name]
 
-    async def request_and_post_pg(  #  type: ignore[return]
+    async def request_and_post_pg(  # type: ignore[return]
             self,
-            client: aiohttp.ClientSession,
-            pg_session: AsyncSession,
             currency_name: str,
-            url: str) -> tuple[int, Currency]:  
+            url: str) -> tuple[int, Currency]:
         try:
-            async with client.get(url + currency_name) as r:
+            async with self.aio_session.get(url + currency_name) as r:
                 if r.status == HTTPStatus.OK:
                     currency_value = await self.parse_response(r, currency_name)
-                    pg_obj = await self.post_pg(currency_name,
-                                                currency_value,
-                                                pg_session)
+                    pg_obj = await self.post_pg(currency_name, currency_value)
                     return HTTPStatus.OK.value, pg_obj
         except Exception as e:
             logger.error('url - %s exception - %s', url, e.args)
-            await pg_session.rollback()
+            await self.pg_session.rollback()
 
     async def run_tasks(self, currencies: tuple, url: str) -> dict:
         engine = create_async_engine(settings.data_base)
-        async_session = AsyncSession(engine, expire_on_commit=False)
-        async with aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(settings.main_timeout),
-            connector=aiohttp.TCPConnector(
-                limit=settings.max_connections,
-                keepalive_timeout=settings.max_connections / 2,
-                ssl=True)) as client:
-            async with async_session as pg_session:
+        async with get_aiohttp() as self.aio_session:
+            async with AsyncSession(engine, expire_on_commit=False) as self.pg_session:
                 tasks = [asyncio.ensure_future(
-                         self.request_and_post_pg(client, pg_session, cur, url)) for cur in currencies]
+                         self.request_and_post_pg(cur, url)) for cur in currencies]
                 done, _ = await asyncio.wait(tasks)
-                await pg_session.commit()
+                await self.pg_session.commit()
                 return {str(d.result()[1].id): int(d.result()[0]) for d in done}
 
     def run_works(self):
