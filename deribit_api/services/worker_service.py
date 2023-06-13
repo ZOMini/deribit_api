@@ -9,7 +9,7 @@ from core.config import settings
 from core.logger import logger
 from db.db_connection import get_db_contextmanager
 from db.db_models import Currency
-from services.aiohttp_client import get_aiohttp
+from services.http_client import get_http_client
 
 logger.name = 'worker'
 
@@ -17,9 +17,9 @@ logger.name = 'worker'
 class WorkerService:
     def __init__(self,
                  db_session: AsyncSession,
-                 aio_session: aiohttp.ClientSession) -> None:
+                 http_session: aiohttp.ClientSession) -> None:
         self.db_session = db_session
-        self.aio_session = aio_session
+        self.http_session = http_session
 
     async def post_db(self,
                       ticker: str,
@@ -37,7 +37,7 @@ class WorkerService:
             ticker: str,
             url: str) -> tuple[int, Currency]:
         try:
-            async with self.aio_session.get(url + ticker) as r:
+            async with self.http_session.get(url + ticker) as r:
                 if r.status == HTTPStatus.OK:
                     ticker_value = await self.parse_response(r, ticker)
                     db_obj = await self.post_db(ticker, ticker_value)
@@ -57,9 +57,9 @@ class WorkerService:
 async def run_works() -> dict:
     currencies = settings.currencies
     url = settings.currencies_url
-    async with get_aiohttp() as aio_session:
+    async with get_http_client() as http_session:
         async with get_db_contextmanager() as pg_session:
-            worker_service = WorkerService(pg_session, aio_session)
+            worker_service = WorkerService(pg_session, http_session)
             result = await worker_service.run_tasks(currencies, url)
             logger.debug(result)
             return result

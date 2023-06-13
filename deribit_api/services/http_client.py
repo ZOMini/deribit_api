@@ -8,7 +8,7 @@ from core.config import settings
 
 
 @asynccontextmanager
-async def get_aiohttp() -> AsyncIterator[aiohttp.ClientSession]:
+async def get_http_client() -> AsyncIterator[aiohttp.ClientSession]:
     client = aiohttp.ClientSession(
         timeout=aiohttp.ClientTimeout(
             None,
