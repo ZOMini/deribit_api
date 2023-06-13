@@ -1,20 +1,39 @@
 import runpy
 import sys
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_scoped_session,
+    async_sessionmaker,
+    create_async_engine
+)
+from sqlalchemy.orm import sessionmaker
 
 from core.config import settings
 
 engine = create_async_engine(settings.data_base, echo=settings.debug)
-Base = declarative_base()
-async_session = async_sessionmaker(engine, expire_on_commit=False)  # type: ignore[call-overload]
+async_session = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)  # type: ignore[call-overload]
 
 
-async def get_pg():
+# Dependency
+async def get_pg() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
+
+
+@asynccontextmanager
+async def get_pg_contextmanager():
+    engine = create_async_engine(settings.data_base, echo=settings.debug)
+    session = AsyncSession(engine, expire_on_commit=False)
+    try:
+        yield session
+    finally:
+        await session.close()
 
 
 def migrate():

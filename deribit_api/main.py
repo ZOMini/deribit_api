@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api.v1 import deribit
-from db.pg import async_session, migrate
+from db.pg import engine, migrate
 
 app = FastAPI(
     title='deribit',
@@ -22,10 +22,7 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
-    try:
-        await async_session.close_all()
-    except TypeError:
-        pass
+    pass
 
 
 if __name__ == '__main__':

@@ -1,0 +1,22 @@
+version: "3.2"
+services:
+  deribit_db:
+    image: postgres:13-alpine
+    container_name: deribit_db
+    env_file: 
+      - ./.env
+    volumes:
+      - deribit_db_data:/var/lib/postgresql/data/
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - deribit_nw
+
+
+volumes:
+  deribit_db_data:
+
+networks:
+  deribit_nw:
+    driver: bridge
