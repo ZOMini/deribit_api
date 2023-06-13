@@ -18,7 +18,7 @@ async def get_aiohttp():
             limit=settings.max_connections,
             loop=asyncio.get_event_loop(),
             keepalive_timeout=settings.main_timeout / 2,
-            ssl=False))
+            ssl=True))
     try:
         yield client
     finally:

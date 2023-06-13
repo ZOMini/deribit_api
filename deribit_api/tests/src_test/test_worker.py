@@ -2,20 +2,16 @@ from http import HTTPStatus
 
 import pytest
 
-from core.config import settings
-from models.deribit_models import Currency
-from services.worker_service import WorkerService
+from db.db_models import Currency
+from services.worker_service import run_works
 
 
 @pytest.mark.asyncio
-async def test_get_data_and_post_in_pg(pg_get_obj_by_id, pg_delete_obj_by_id):
+async def test_get_data_and_post_in_pg(db_get_obj_by_id, db_delete_obj_by_id):
     """Тестирует воркер. Статус гет запроса и произошла ли запись в БД."""
-    currencies = settings.currencies
-    url = settings.currencies_url
-    worker_service = WorkerService()
-    worker_response = await worker_service.run_tasks(currencies, url)
+    worker_response = await run_works()
     for id, status in worker_response.items():
-        obj = await pg_get_obj_by_id(id)
-        await pg_delete_obj_by_id(obj)
+        obj = await db_get_obj_by_id(id)
+        await db_delete_obj_by_id(obj)
         assert status == HTTPStatus.OK
         assert isinstance(obj, Currency)

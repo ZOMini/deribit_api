@@ -6,16 +6,12 @@ from pytz import utc  # type: ignore[import]
 
 from core.config import settings
 from core.logger import logger
-from db.pg import migrate
-from services.worker_service import WorkerService
+from services.worker_service import worker_run
 
 logger.name = 'worker'
-# Если запускать только воркер, без ручек, то миграции ниже.
-# migrate()
-worker_sevice = WorkerService()
 scheduler = BlockingScheduler(timezone=utc)  # Или BackgroundScheduler
 scheduler._logger = logger
-scheduler.add_job(worker_sevice.run_works,
+scheduler.add_job(worker_run,
                   'interval',
                   seconds=settings.scheduler_interval)
 scheduler.start()
