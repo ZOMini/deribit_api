@@ -26,6 +26,3 @@ async def get_db_contextmanager():
         yield session
     finally:
         await session.close()
-
-
-

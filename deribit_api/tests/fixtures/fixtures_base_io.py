@@ -19,6 +19,9 @@ def event_loop():
 
 @pytest_asyncio.fixture(scope='session')
 async def db_client():
-    async_session: AsyncSession = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False, autoflush=True)
+    async_session: AsyncSession = sessionmaker(engine,
+                                               class_=AsyncSession,
+                                               expire_on_commit=False,
+                                               autoflush=True)
     async with async_session() as session:
         yield session

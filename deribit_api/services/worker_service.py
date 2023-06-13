@@ -28,7 +28,7 @@ class WorkerService:
         self.db_session.add(obj)
         return obj
 
-    async def parse_response(self, r: aiohttp.ClientResponse, ticker):
+    async def parse_response(self, r: aiohttp.ClientResponse, ticker) -> float:
         response_bin = await r.read()
         return orjson.loads(response_bin)['result'][ticker]
 
@@ -53,7 +53,8 @@ class WorkerService:
         await self.db_session.commit()
         return {str(d.result()[1].id): int(d.result()[0]) for d in done}
 
-async def run_works():
+
+async def run_works() -> dict:
     currencies = settings.currencies
     url = settings.currencies_url
     async with get_aiohttp() as aio_session:
@@ -63,6 +64,6 @@ async def run_works():
             logger.debug(result)
             return result
 
+
 def worker_run():
     asyncio.run(run_works())
-
