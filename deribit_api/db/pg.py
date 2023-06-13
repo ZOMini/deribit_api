@@ -4,12 +4,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_scoped_session,
-    async_sessionmaker,
-    create_async_engine
-)
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from core.config import settings
@@ -43,8 +38,6 @@ def migrate():
             # На всякий пытается создать миграции, но они уже есть, должны быть.
             sys.argv = ['', 'revision', '-m', '"init"', '--autogenerate']
             runpy.run_module('alembic', run_name='__main__')
-        except Exception:
-            pass
         finally:
             # Мигрируем.
             sys.argv = ['', 'upgrade', 'head']

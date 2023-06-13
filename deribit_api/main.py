@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
 from api.v1 import deribit
-from db.pg import engine, migrate
+from db.pg import migrate
 
 app = FastAPI(
     title='deribit',
