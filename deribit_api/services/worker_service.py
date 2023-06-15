@@ -17,7 +17,7 @@ logger.name = 'worker'
 class WorkerService:
     def __init__(self,
                  db_session: AsyncSession,
-                 http_session: aiohttp.ClientSession) -> None:
+                 http_session: aiohttp.ClientSession):
         self.db_session = db_session
         self.http_session = http_session
 
@@ -54,7 +54,7 @@ class WorkerService:
         return {str(d.result()[1].id): int(d.result()[0]) for d in done}
 
 
-async def run_works() -> dict:
+async def run_works_async() -> dict:
     currencies = settings.currencies
     url = settings.currencies_url
     async with get_http_client() as http_session:
@@ -66,4 +66,4 @@ async def run_works() -> dict:
 
 
 def worker_run():
-    asyncio.run(run_works())
+    asyncio.run(run_works_async())
