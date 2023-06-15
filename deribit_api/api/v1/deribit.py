@@ -3,11 +3,11 @@ from typing import Annotated, Sequence
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from api.v1 import responses
 from db.db_models import Currency
 from db.db_service import DBService, get_db_service
 
 router = APIRouter()
-
 Ticker = Annotated[str, Query(required=True, enum=['BTC', 'ETH'])]
 
 
@@ -20,14 +20,16 @@ async def all_by_currency(
     return await db_service.all_by_currency(ticker)
 
 
-@router.get('/last_currency')
+@router.get('/last_currency',
+            responses={status.HTTP_404_NOT_FOUND: responses.DESCRIPTION_404})
 async def last_currency(
     ticker: Ticker,
     db_service: DBService = Depends(get_db_service),
-) -> Currency | HTTPException:
+) -> Currency:
     currency = await db_service.last_currency(ticker)
     if not currency:
-        return HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            detail=responses.DETAIL_404)
     return currency
 
 
