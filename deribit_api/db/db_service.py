@@ -22,7 +22,7 @@ class DBService:
             .order_by(Currency.timestamp.desc()))
         return scalars.all()
 
-    async def last_currency(self, ticker) -> Currency:
+    async def last_currency(self, ticker) -> Currency | None:
         scalar = await self.db_conn.scalar(
             select(Currency).filter(Currency.ticker == ticker)
             .order_by(Currency.timestamp.desc()).limit(1))

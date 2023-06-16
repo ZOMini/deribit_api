@@ -1,14 +1,11 @@
 import asyncio
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import aiohttp
 
 from core.config import settings
 
 
-@asynccontextmanager
-async def get_http_client() -> AsyncIterator[aiohttp.ClientSession]:
+def get_http_client() -> aiohttp.ClientSession:
     client = aiohttp.ClientSession(
         timeout=aiohttp.ClientTimeout(
             None,
@@ -20,7 +17,4 @@ async def get_http_client() -> AsyncIterator[aiohttp.ClientSession]:
             loop=asyncio.get_event_loop(),
             keepalive_timeout=settings.main_timeout / 2,
             ssl=True))
-    try:
-        yield client
-    finally:
-        await client.close()
+    return client

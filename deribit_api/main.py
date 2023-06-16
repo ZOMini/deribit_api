@@ -1,3 +1,5 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -31,4 +33,5 @@ if __name__ == '__main__':
                 port=8001,
                 limit_max_requests=128,
                 workers=1,
+                log_level=logging.DEBUG,
                 reload=False)

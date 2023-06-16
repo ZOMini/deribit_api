@@ -55,7 +55,7 @@ class WorkerService:
 
 
 async def run_works_async() -> dict:
-    currencies = settings.currencies
+    currencies = tuple(settings.currencies)
     url = settings.currencies_url
     async with get_http_client() as http_session:
         async with get_db_contextmanager() as pg_session:
