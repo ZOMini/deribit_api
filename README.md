@@ -22,6 +22,6 @@
 ## URL
   - http://127.0.0.1/deribit/api/openapi - документация.
 
- 
+  
 
 
